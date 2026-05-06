@@ -1,0 +1,949 @@
+===============================================================================
+CLEANLOOP APP - COMPLETE REBUILD GUIDE FOR AI ASSISTANT
+===============================================================================
+Created: April 30, 2026
+Purpose: Blueprint for rebuilding CleanLoop using AI Assistants (Figma AI, Grok, etc.)
+
+===============================================================================
+1. APP OVERVIEW & PURPOSE
+===============================================================================
+
+CleanLoop is a waste management and environmental sustainability platform that:
+- Connects users (waste generators) with drivers/collectors (waste management professionals)
+- Enables users to request scheduled waste pickups
+- Allows users to report illegal dumpsites/illegal waste dumping sites
+- Provides real-time pickup tracking using GPS/maps
+- Rewards users with points for eco-friendly contributions
+- Includes a wallet system for currency and clean points
+- Has different interfaces for regular users, professional users, drivers, and admins
+
+Core Mission: Streamline waste collection and combat illegal dumping through technology
+
+===============================================================================
+2. USER ROLES & FEATURES BY ROLE
+===============================================================================
+
+2.1 REGULAR USER / CUSTOMER
+---------------------------------
+Features:
+  • Sign up / Login (Email & Password)
+  • Dashboard with quick action cards
+  • Request Pickup
+    - Select waste type (General, Recyclables, Organic, Hazardous)
+    - Choose pickup time slot
+    - Upload photo of waste
+    - Provide address/location
+    - Get assigned to available driver automatically
+  • Real-time Pickup Tracking
+    - Interactive map showing driver location
+    - User location
+    - Distance calculation
+    - Driver contact information
+  • Report Illegal Dumpsites
+    - Capture/upload photo of dumpsite
+    - Describe the issue
+    - Pin location on map
+    - Track report status (Pending → Clearing → Resolved)
+  • Wallet System
+    - View accumulated CleanPoints
+    - Currency balance
+    - Transaction history
+  • History Screen
+    - View past pickups
+    - Track rewards earned
+  • User Profile
+    - Edit personal information
+    - Phone, name
+  • Settings
+    - Theme selection (Light, Dark, Orange)
+  • Notifications
+    - Driver assignments
+    - Pickup status updates
+    - System notifications
+    - Two-way messaging with drivers
+
+2.2 PROFESSIONAL USER (Power User)
+---------------------------------
+Features:
+  • Same as Regular User PLUS:
+  • Advanced Dashboard with statistics
+    - Total pickups completed
+    - Waste reduced (kg/metric tons)
+    - Ranking/Leaderboard position
+    - Trending insights
+  • Performance analytics
+  • Profile badges/achievements
+
+2.3 DRIVER / COLLECTOR
+---------------------------------
+Features:
+  • Driver-specific login/registration
+  • Driver Dashboard
+    - View available pickups (posted by users)
+    - View accepted/assigned pickups
+    - Track assigned tasks
+  • Pickups Screen
+    - List of all available pickups
+    - Accept/claim pickups
+    - Mark pickups as complete
+  • Earnings Screen
+    - View earnings from completed pickups
+    - Track balance
+  • Real-time communication
+    - Message users about pickups
+    - Notifications
+  • Driver Profile
+    - Edit driver information
+    - Verification status
+    - Rating/reviews (if implemented)
+  • Two-way Notifications
+    - User messages
+    - System updates
+
+2.4 ADMIN / STAFF
+---------------------------------
+Features:
+  • Admin Dashboard (Dark theme)
+  • Manage Drivers
+    - View all registered drivers
+    - Verify drivers
+    - Promote drivers to staff
+  • Manage Pickup Requests
+    - View all pickups system-wide
+    - Monitor status
+    - Reassign if needed
+  • View Dumpsite Reports
+    - All reported illegal dumpsites
+    - Status tracking
+    - Monitor resolution progress
+  • Wallet Management
+    - View all user wallets
+    - Currency balances
+    - Clean points distribution
+  • Notifications Management
+    - Send system-wide notifications
+
+===============================================================================
+3. CORE FEATURES DETAILED BREAKDOWN
+===============================================================================
+
+3.1 AUTHENTICATION SYSTEM
+---------------------------------
+Components Needed:
+  • Login Screen
+  • Registration Screen
+  • User role selection (User vs Driver during signup)
+  • JWT Token management
+  • Session persistence
+  • Demo/Guest access option
+
+Flow:
+  1. User chooses role (User, Driver, or Admin)
+  2. Register with email, password, phone, name
+  3. Backend validates and stores credentials
+  4. JWT tokens generated (access + refresh)
+  5. Tokens stored in localStorage
+  6. Auto-logout on token expiration
+  7. Can access demo mode for testing
+
+3.2 REQUEST PICKUP FEATURE
+---------------------------------
+Components Needed:
+  • Waste type selector (4 types)
+  • Time slot picker (7 daily slots from 6AM-7PM)
+  • Photo upload/capture
+  • Address search & location pin
+  • Map integration for location selection
+  • Success confirmation screen
+
+Backend Integration:
+  • POST /api/user/pickups/
+  • Accepts: waste_type, scheduled_time, photo, address, latitude, longitude
+  • Auto-assigns driver from available drivers
+  • Creates notifications for driver and user
+  • Returns pickup ID and status
+
+3.3 REAL-TIME PICKUP TRACKING
+---------------------------------
+Components Needed:
+  • Interactive Leaflet.js map
+  • Driver location marker (blue/different color)
+  • User location marker (green/different color)
+  • Distance calculation (Haversine formula)
+  • Driver phone contact display
+  • Pickup status indicator
+
+Technical Details:
+  • Default centers: Lagos coordinates (6.5244, 3.3792)
+  • Surulere HQ: (6.5726, 3.1971)
+  • Ikeja Computer Village: (6.5973, 3.3850)
+  • Live updates via API polling or WebSocket
+
+3.4 REPORT ILLEGAL DUMPSITE
+---------------------------------
+Components Needed:
+  • Photo upload/capture
+  • Description text area (min 10 chars)
+  • Location pin on map
+  • Status tracking display
+
+Backend Integration:
+  • POST /api/report-dumpsite/
+  • Accepts: description, location_address, latitude, longitude, photo (multipart/form-data)
+  • Status workflow: pending → clearing → cleared
+  • Admin dashboard monitors these reports
+
+3.5 WALLET & POINTS SYSTEM
+---------------------------------
+Data Structure:
+  • User Wallet:
+    - currency_balance (decimal)
+    - clean_points (integer)
+    - subscription_status (string)
+    - next_payment_date (date, optional)
+  
+  • Points per pickup: 100 points (configurable)
+  • Points accumulated based on pickup completion
+  • Currency conversion: CleanPoints can be redeemed for rewards
+
+Display:
+  • Wallet Screen shows:
+    - CleanPoints total
+    - Currency balance
+    - Transaction history
+    - Subscription status
+
+3.6 NOTIFICATIONS SYSTEM
+---------------------------------
+Data Structure:
+  • Notification Types:
+    - driver_message (messages from drivers)
+    - pickup_assigned (when driver assigned)
+    - pickup_completed (when pickup done)
+    - general (system notifications)
+  • Fields: title, message, is_read, reply, related_pickup, created_at
+
+Features:
+  • Bell icon shows unread count
+  • Dropdown notification list
+  • Mark as read
+  • Two-way messaging with drivers
+  • Auto-clear after reading
+
+3.7 THEME SYSTEM
+---------------------------------
+Available Themes:
+  • Light Mode (default)
+    - Green accents
+    - Light green backgrounds (bg-green-50)
+    - Green text (text-green-700)
+  
+  • Dark Mode
+    - Gray/green accents
+    - Dark gray backgrounds (bg-gray-900)
+    - Light green text (text-green-400)
+  
+  • Orange Mode
+    - Orange accents
+    - Orange backgrounds (bg-orange-50)
+    - Orange text (text-orange-700)
+
+Theme Context manages:
+  • Theme state globally
+  • Color tokens for each theme
+  • TailwindCSS class mapping
+
+3.8 NAVIGATION SYSTEM
+---------------------------------
+Multiple Navigation Models by Role:
+
+Regular User Bottom Nav (Mobile):
+  • Home (Dashboard)
+  • Request Pickup
+  • Track (Pickup Tracking)
+  • Wallet
+  • Profile
+  • Menu (Settings, History, Report Dumping)
+
+Driver Bottom Nav:
+  • Home (Driver Dashboard)
+  • Pickups
+  • Earnings
+  • Notifications
+  • Profile
+
+Admin: Tabs in dashboard (Drivers, Reports, Pickups, Wallets)
+
+===============================================================================
+4. FRONTEND TECH STACK & DEPENDENCIES
+===============================================================================
+
+CORE FRAMEWORK:
+  • React 19.2.0 - UI library
+  • React DOM 19.2.0 - DOM rendering
+  • Vite 7.2.4 - Build tool & dev server
+  • Node.js - JavaScript runtime
+
+STYLING & UI:
+  • Tailwind CSS 4.1.18 - Utility-first CSS framework
+  • @tailwindcss/vite 4.1.18 - Vite plugin for Tailwind
+  • PostCSS 8.5.6 - CSS processor
+  • Autoprefixer 10.4.23 - CSS vendor prefixing
+  • Lucide React 0.555.0 - SVG icon library (100+ icons)
+
+STATE MANAGEMENT:
+  • @reduxjs/toolkit 2.11.0 - Redux state management
+  • react-redux 9.2.0 - Redux React bindings
+
+MAPS & LOCATION:
+  • Leaflet 1.9.4 - Open-source maps library
+  • react-leaflet 5.0.0 - React wrapper for Leaflet
+  • leaflet-defaulticon-compatibility 0.1.2 - Leaflet icon fix
+
+API & HTTP:
+  • Axios 1.13.2 - HTTP client for API calls
+
+BUILD TOOLS & DEV:
+  • @vitejs/plugin-react 5.1.1 - React JSX support in Vite
+  • ESLint 9.39.1 - Code quality linting
+  • @eslint/js 9.39.1 - ESLint JavaScript rules
+  • eslint-plugin-react-hooks 7.0.1 - React hooks linting
+  • eslint-plugin-react-refresh 0.4.24 - React refresh support
+  • TypeScript types (for development)
+
+===============================================================================
+5. COMPONENT STRUCTURE
+===============================================================================
+
+LAYOUT COMPONENTS:
+  • LayoutWrapper - Main layout container with nav/header
+  • SharedHeader - Top header (logo, notifications, theme)
+  • BottomNav - Regular user bottom navigation
+  • DriverBottomNav - Driver bottom navigation
+  • ProfessionalBottomNav - Professional user bottom navigation
+  • HeroSection - Hero banner with call-to-action
+
+AUTHENTICATION:
+  • WelcomePage - Landing page with login/register options
+  • Login - User login form
+  • Register - User registration form
+  • DriverLogin - Driver-specific login
+  • DriverRegister - Driver registration form
+
+DASHBOARD SCREENS:
+  • Dashboard - Regular user dashboard (light/modern version)
+  • ModernDashboard - Updated regular user dashboard
+  • ProfessionalDashboard - Professional/power user dashboard
+  • DriverDashboard - Driver home screen with available pickups
+  • AdminDashboard - Admin control panel
+
+CORE FEATURE SCREENS:
+  • RequestPickup - Create new pickup request
+  • PickupTracking - Real-time tracking of active pickup
+  • ReportDumping - Report illegal dumpsite
+  • Wallet - View wallet and points
+  • PickupsScreen - Driver: View assigned/available pickups
+  • PickupDetailsScreen - Driver: View details of specific pickup
+  • EarningsScreen - Driver: View earnings
+
+PROFILE & SETTINGS:
+  • ProfileScreen - User profile view/edit
+  • ModernProfileScreen - Updated profile screen
+  • DriverProfileScreen - Driver profile
+  • UserSettings - Settings page (theme, etc.)
+  • HistoryScreen - View past pickups/activity
+  • ModernHistoryScreen - Updated history view
+
+UTILITY COMPONENTS:
+  • AppRouter - Main routing/state management (all screens)
+  • ActionCard - Reusable card component for quick actions
+
+UI COMPONENTS (./UI directory):
+  • Button - Reusable button component
+  • Card - Reusable card component
+  • Input - Reusable input component
+  • Badge - Status/label badge component
+  • index.js - Exports all UI components
+
+===============================================================================
+6. SERVICES & UTILITIES
+===============================================================================
+
+SERVICES (./services):
+  • api.js - Main API entry point (uses adapter pattern)
+  • apiAdapter.js - Adapter that switches between backend API and localStorage
+  • authService.js - Authentication functions (login, register, logout, session)
+  • localStorage-api.js - Fallback localStorage for demo/offline mode
+
+CONTEXT:
+  • ThemeContext.jsx - Global theme state management
+
+UTILITIES:
+  • designTokens.js - Design system tokens (colors, spacing, fonts)
+  • themeHelper.js - Theme conversion and helper functions
+
+===============================================================================
+7. BACKEND API ENDPOINTS REQUIRED
+===============================================================================
+
+AUTHENTICATION:
+  POST   /api/auth/register/         - Register new user
+  POST   /api/auth/login/            - Login user (returns JWT tokens)
+  POST   /api/auth/refresh/          - Refresh access token
+  POST   /api/auth/logout/           - Logout user
+
+USER MANAGEMENT:
+  GET    /api/user/profile/          - Get current user profile
+  PUT    /api/user/profile/          - Update user profile
+  GET    /api/user/pickups/          - Get user's pickups
+  GET    /api/users/                 - Admin: Get all users
+
+PICKUP REQUESTS:
+  GET    /api/user/pickups/          - Get user's pickup requests
+  POST   /api/user/pickups/          - Create new pickup request
+  GET    /api/user/pickups/{id}/     - Get pickup details
+  PUT    /api/user/pickups/{id}/     - Update pickup
+  DELETE /api/user/pickups/{id}/     - Cancel pickup
+
+DRIVER FUNCTIONALITY:
+  GET    /api/driver/available-pickups/  - Get available pickups for drivers
+  GET    /api/driver/assigned-pickups/   - Get driver's assigned pickups
+  POST   /api/driver/accept-pickup/{id}/ - Driver accepts pickup
+  PUT    /api/driver/pickup/{id}/update-status/ - Update pickup status
+  GET    /api/driver/earnings/           - Get driver earnings
+
+REPORTING:
+  POST   /api/report-dumpsite/           - Report illegal dumpsite
+  GET    /api/report-dumpsite/           - Get all reports (user's or admin)
+  GET    /api/report-dumpsite/{id}/      - Get report details
+
+ADMIN:
+  GET    /api/admin/drivers/             - Get all drivers
+  POST   /api/admin/drivers/{id}/verify/ - Verify driver
+  POST   /api/admin/make-driver-staff/{id}/ - Promote driver to staff
+  GET    /api/admin/all-pickups/         - Get all pickups
+  GET    /api/admin/wallets/             - Get all wallets
+
+NOTIFICATIONS:
+  GET    /api/notifications/             - Get user notifications
+  POST   /api/notifications/{id}/read/   - Mark notification as read
+  POST   /api/notifications/{id}/reply/  - Reply to notification
+
+LOCATIONS:
+  GET    /api/search-address/            - Search address (returns coordinates)
+
+WALLET:
+  GET    /api/wallet/                    - Get wallet info
+  GET    /api/wallet/transactions/       - Get transaction history
+
+===============================================================================
+8. DATABASE MODELS (BACKEND)
+===============================================================================
+
+USER (Django built-in):
+  • id (primary key)
+  • username
+  • email
+  • first_name
+  • last_name
+  • password (hashed)
+  • is_staff (for admin/driver)
+  • is_active
+  • date_joined
+
+PROFILE (One-to-One with User):
+  • user_id (FK)
+  • role (user, collector, admin)
+  • phone
+  • points (integer)
+  • wallet_balance (decimal)
+  • latitude / longitude
+  • is_verified (boolean)
+  • last_updated (datetime)
+
+PICKUP_REQUEST:
+  • id
+  • user_id (FK) - who requested
+  • collector_id (FK) - driver assigned
+  • waste_type (string)
+  • scheduled_time (datetime)
+  • status (pending, assigned, in_progress, completed)
+  • photo (image file)
+  • address (string)
+  • latitude / longitude
+  • points (integer) - reward
+  • created_at / updated_at (datetime)
+
+NOTIFICATION:
+  • id
+  • recipient_id (FK)
+  • sender_id (FK)
+  • type (driver_message, pickup_assigned, pickup_completed, general)
+  • title
+  • message
+  • is_read (boolean)
+  • reply (text)
+  • related_pickup_id (FK)
+  • created_at (datetime)
+
+ILLEGAL_DUMPSITE_REPORT:
+  • id
+  • reporter_id (FK)
+  • description
+  • location_address
+  • latitude / longitude
+  • photo (image file)
+  • status (pending, clearing, cleared)
+  • created_at (datetime)
+
+WALLET:
+  • id
+  • user_id (FK) - One-to-One
+  • currency_balance (decimal)
+  • clean_points (integer)
+  • subscription_status (string)
+  • next_payment_date (date)
+
+===============================================================================
+9. KEY FEATURES TO IMPLEMENT SEQUENTIALLY
+===============================================================================
+
+PHASE 1 - MVP (MINIMUM VIABLE PRODUCT):
+  1. User Authentication (Login/Register)
+  2. Basic Dashboard
+  3. Request Pickup (without map)
+  4. Simple list of pickups
+  5. Basic notifications
+  6. Dark/Light theme toggle
+  
+PHASE 2 - CORE FUNCTIONALITY:
+  7. Map integration (Leaflet)
+  8. Real-time pickup tracking
+  9. Report illegal dumpsites
+  10. Wallet & Points system
+  11. User profile management
+  12. History/Activity screen
+  
+PHASE 3 - ADVANCED:
+  13. Driver functionality
+  14. Admin dashboard
+  15. Two-way messaging
+  16. Advanced notifications
+  17. Leaderboards/Achievements
+  18. Analytics dashboard
+  
+PHASE 4 - POLISH & SCALE:
+  19. Performance optimization
+  20. Error handling & logging
+  21. Offline capabilities
+  22. Payment integration
+  23. Data export features
+  24. API rate limiting
+
+===============================================================================
+10. DESIGN SYSTEM & COLOR SCHEME
+===============================================================================
+
+PRIMARY COLORS:
+  • Green (Eco-friendly): #15803d (dark), #166534 (darker)
+  • Orange (Alternate): #F97316, #EA580C
+  • Dark Gray (Admin): #111827, #1F2937
+
+TEXT COLORS:
+  • Primary: #1F2937 (dark gray)
+  • Secondary: #6B7280 (medium gray)
+  • On Green: #ffffff (white)
+  • On Orange: #ffffff (white)
+
+BACKGROUND COLORS:
+  • Light mode: #ffffff, #f3f4f6
+  • Green accent bg: #f0fdf4 (bg-green-50)
+  • Orange accent bg: #fff7ed (bg-orange-50)
+  • Dark mode: #111827 (bg-gray-900)
+
+SPACING:
+  • Uses Tailwind's 4px base unit
+  • Common: 4px, 8px, 12px, 16px, 24px, 32px, 48px
+
+SHADOWS:
+  • Small: 0 1px 2px 0 rgba(0,0,0,0.05)
+  • Medium: 0 4px 6px -1px rgba(0,0,0,0.1)
+  • Large: 0 10px 15px -3px rgba(0,0,0,0.1)
+
+TYPOGRAPHY:
+  • Headings: Bold, 24px-32px
+  • Body: Regular, 14px-16px
+  • Small: 12px-14px
+
+BORDER RADIUS:
+  • Buttons/Cards: 8px-12px
+  • Inputs: 6px-8px
+  • Badges: 9999px (fully rounded)
+
+===============================================================================
+11. FILE STRUCTURE & ORGANIZATION
+===============================================================================
+
+Frontend:
+  cleanloop/
+    ├── src/
+    │   ├── components/
+    │   │   ├── [All 30+ component files]
+    │   │   └── UI/
+    │   │       ├── Button.jsx
+    │   │       ├── Card.jsx
+    │   │       ├── Input.jsx
+    │   │       ├── Badge.jsx
+    │   │       └── index.js
+    │   ├── context/
+    │   │   └── ThemeContext.jsx
+    │   ├── services/
+    │   │   ├── api.js
+    │   │   ├── apiAdapter.js
+    │   │   ├── authService.js
+    │   │   └── localStorage-api.js
+    │   ├── utils/
+    │   │   ├── designTokens.js
+    │   │   └── themeHelper.js
+    │   ├── assets/ [images, icons]
+    │   ├── App.jsx
+    │   ├── App.css
+    │   ├── index.css
+    │   └── main.jsx
+    ├── public/ [static assets]
+    ├── index.html
+    ├── vite.config.js
+    ├── tailwind.config.js
+    ├── postcss.config.js
+    ├── package.json
+    └── eslint.config.js
+
+Backend:
+  cleanloop-be/
+    ├── user/
+    │   ├── models.py [Database models]
+    │   ├── views.py [API endpoints]
+    │   ├── serializers.py [Data serialization]
+    │   ├── urls.py [URL routing]
+    │   ├── utils.py [Helper functions]
+    │   └── migrations/
+    ├── CleanLoop/
+    │   ├── settings.py [Django settings]
+    │   ├── urls.py [Project URLs]
+    │   ├── wsgi.py [WSGI config]
+    │   └── asgi.py [ASGI config]
+    ├── manage.py
+    ├── requirements.txt [Python dependencies]
+    ├── db.sqlite3 [Development database]
+    └── media/ [User uploads - photos]
+
+===============================================================================
+12. CRITICAL CONFIGURATION FILES
+===============================================================================
+
+FRONTEND:
+
+vite.config.js:
+  • React plugin enabled
+  • Build output: dist/
+  • Use default esbuild minification (NOT terser)
+  • Define environment variables
+
+package.json:
+  • Scripts: dev, build, lint, preview
+  • All required dependencies listed
+  • No missing packages for Vercel deployment
+
+tailwind.config.js:
+  • Content paths configured
+  • Theme: colors, spacing
+  • Plugins configured
+
+postcss.config.js:
+  • Tailwind and Autoprefixer
+
+BACKEND:
+
+settings.py (Django):
+  • SECRET_KEY
+  • DEBUG mode
+  • ALLOWED_HOSTS
+  • INSTALLED_APPS (rest_framework, corsheaders, etc.)
+  • DATABASES (SQLite dev, PostgreSQL prod)
+  • JWT authentication config
+  • CORS settings
+  • MEDIA_ROOT and MEDIA_URL for uploads
+  • CORS_ALLOWED_ORIGINS
+
+urls.py:
+  • /api/auth/* routes
+  • /api/user/* routes
+  • /api/driver/* routes
+  • /api/admin/* routes
+  • /api/report-dumpsite/* routes
+  • /api/notifications/* routes
+  • /api/wallet/* routes
+
+===============================================================================
+13. INTEGRATION POINTS (Frontend ↔ Backend)
+===============================================================================
+
+API COMMUNICATION:
+  • All frontend API calls use Axios
+  • apiAdapter.js provides fallback to localStorage for offline/demo
+  • JWT tokens stored in localStorage
+  • Authorization header: "Bearer {token}"
+  • Multipart/form-data for file uploads
+
+DATA FLOW:
+  1. Frontend component dispatches action/API call
+  2. Axios interceptor adds auth token
+  3. Request sent to Django backend
+  4. Backend validates JWT and authenticates user
+  5. Backend processes request, queries database
+  6. Response returned as JSON
+  7. Frontend updates state (Redux/local state)
+  8. UI re-renders with new data
+
+ERROR HANDLING:
+  • 401 Unauthorized → Redirect to login
+  • 403 Forbidden → Show permission error
+  • 400 Bad Request → Show validation errors
+  • 500 Server Error → Show generic error, log to console
+
+===============================================================================
+14. KEY BUSINESS LOGIC
+===============================================================================
+
+PICKUP ASSIGNMENT:
+  • When user requests pickup → Backend randomly selects from active drivers
+  • Creates notifications for both user and driver
+  • Marks pickup as "assigned"
+  • Driver can accept and change status to "in_progress"
+  • On completion → status becomes "completed", user gets 100 points
+
+POINTS CALCULATION:
+  • Each completed pickup = 100 points (configurable)
+  • Points awarded when pickup status = "completed"
+  • Points can be viewed in wallet
+  • Can be redeemed for rewards or currency conversion
+
+VALIDATION RULES:
+  • Scheduled time must be in future (not past)
+  • Waste type must be from predefined list
+  • Photo and address required for pickups
+  • Description must be ≥10 characters for reports
+  • Email must be unique (case-insensitive)
+  • Password must be ≥6 characters
+  • Phone number validation (format)
+
+ADDRESS SEARCH:
+  • Frontend sends address query to backend
+  • Backend uses Nominatim API or similar to geocode
+  • Returns coordinates (lat/lng)
+  • Frontend plots on map
+
+NOTIFICATION WORKFLOW:
+  • Notifications created on specific events:
+    - User creates pickup → driver notified
+    - Driver accepts pickup → user notified
+    - Pickup completed → both parties notified
+    - System updates → relevant users notified
+  • User can reply to notifications (stored in reply field)
+  • Messages visible in notification detail
+
+===============================================================================
+15. DEPLOYMENT CONSIDERATIONS
+===============================================================================
+
+FRONTEND (VERCEL/NETLIFY):
+  ✓ Environment variables for API endpoints
+  ✓ No dependencies missing from package.json
+  ✓ Build command: npm run build
+  ✓ Output directory: dist/
+  ✓ Node version: 18+
+  ✓ CRITICAL: Use esbuild for minification (NOT terser)
+
+BACKEND (HEROKU/RAILWAY/AWS):
+  ✓ requirements.txt up to date
+  ✓ PostgreSQL for production (not SQLite)
+  ✓ Environment variables: SECRET_KEY, DEBUG=False, ALLOWED_HOSTS
+  ✓ CORS configured for frontend domain
+  ✓ Media storage for image uploads (S3 or similar)
+  ✓ Static files collected and served
+  ✓ Database migrations run
+  ✓ Gunicorn or similar WSGI server
+
+===============================================================================
+16. TESTING CREDENTIALS (DEMO MODE)
+===============================================================================
+
+Regular User:
+  Email: demo@example.com
+  Password: demo1234
+
+Driver:
+  Email: driver@example.com
+  Password: driver1234
+
+Admin:
+  (Create through Django admin or staff flag)
+
+Demo Mode:
+  • Click "Try Demo" on welcome page
+  • Pre-populated with mock data
+  • Wallet: 2450 points, ₦2500
+  • No backend calls required
+
+===============================================================================
+17. RESPONSIVE DESIGN REQUIREMENTS
+===============================================================================
+
+BREAKPOINTS (Tailwind):
+  • Mobile: 0px-640px (sm)
+  • Tablet: 640px-1024px (md)
+  • Desktop: 1024px+ (lg)
+
+MOBILE OPTIMIZATION:
+  ✓ Bottom navigation hidden on desktop (md:hidden)
+  ✓ Full-width inputs on mobile
+  ✓ Stacked layouts convert to 2-column on tablet
+  ✓ Buttons sized appropriately for touch (min 44px)
+  ✓ Headers responsive with hamburger menu
+  ✓ Maps full viewport width
+
+DESKTOP OPTIMIZATION:
+  ✓ Side navigation bars visible
+  ✓ Multi-column layouts
+  ✓ Hover states on interactive elements
+  ✓ Max-width container (1280px typical)
+
+===============================================================================
+18. PERFORMANCE OPTIMIZATION
+===============================================================================
+
+FRONTEND:
+  • Lazy loading for route components
+  • Image optimization (compress, responsive sizes)
+  • Bundle splitting by route
+  • Remove unused CSS with Tailwind's purge
+  • Debounce search inputs
+  • Memoize expensive components
+
+BACKEND:
+  • Database indexes on frequently queried fields
+  • Pagination for large lists
+  • Select related/prefetch related for queries
+  • Caching frequently accessed data
+  • Async tasks for heavy operations
+
+CACHING:
+  • Browser caching headers
+  • Redis for session/data caching
+  • LocalStorage for non-sensitive data
+
+===============================================================================
+19. SECURITY CONSIDERATIONS
+===============================================================================
+
+FRONTEND:
+  ✓ Never store sensitive data in localStorage (use httpOnly cookies if possible)
+  ✓ Sanitize user inputs to prevent XSS
+  ✓ CSRF tokens for state-changing requests
+  ✓ No sensitive data in console.log
+
+BACKEND:
+  ✓ JWT token expiration (short-lived access tokens)
+  ✓ HTTPS required in production
+  ✓ Rate limiting on auth endpoints
+  ✓ SQL injection prevention (Django ORM)
+  ✓ File upload validation (size, type)
+  ✓ Validate all inputs server-side
+  ✓ CORS whitelist frontend domain only
+
+===============================================================================
+20. NEXT STEPS FOR AI REBUILD
+===============================================================================
+
+PHASE 1 - DESIGN:
+  1. Create wireframes in Figma
+  2. Design component library
+  3. Create interactive prototypes
+  4. Define animations/transitions
+
+PHASE 2 - FRONTEND CODE:
+  5. Set up React + Vite project
+  6. Install dependencies
+  7. Configure Tailwind CSS
+  8. Build layout structure
+  9. Create all components
+  10. Implement routing
+  11. Add API integration
+
+PHASE 3 - BACKEND CODE:
+  12. Set up Django project
+  13. Create models
+  14. Create serializers
+  15. Create views/viewsets
+  16. Create URL routing
+  17. Implement authentication
+  18. Implement authorization
+
+PHASE 4 - INTEGRATION:
+  19. Connect frontend to backend APIs
+  20. Test all workflows
+  21. Handle error cases
+  22. Add loading states
+
+PHASE 5 - POLISH:
+  23. Performance optimization
+  24. Security audit
+  25. Browser compatibility testing
+  26. Mobile responsiveness testing
+  27. Accessibility (WCAG) compliance
+
+===============================================================================
+21. USEFUL RESOURCES & REFERENCES
+===============================================================================
+
+FRONTEND:
+  • React: https://react.dev
+  • Vite: https://vitejs.dev
+  • Tailwind CSS: https://tailwindcss.com
+  • Leaflet: https://leafletjs.com
+  • React Leaflet: https://react-leaflet.js.org
+  • Lucide Icons: https://lucide.dev
+
+BACKEND:
+  • Django: https://www.djangoproject.com
+  • Django REST Framework: https://www.django-rest-framework.org
+  • JWT Auth: https://django-rest-framework-simplejwt.readthedocs.io
+
+DEPLOYMENT:
+  • Vercel: https://vercel.com
+  • Heroku: https://heroku.com
+  • Railway: https://railway.app
+
+===============================================================================
+SUMMARY
+===============================================================================
+
+CleanLoop is a full-stack waste management application with:
+  • 4 user roles (User, Professional, Driver, Admin)
+  • Real-time GPS tracking for pickups
+  • Gamified rewards system (points + wallet)
+  • Illegal dumping reporting mechanism
+  • Responsive design (mobile-first)
+  • Theme support (Light, Dark, Orange)
+  • Modern tech stack (React, Vite, Tailwind, Django, DRF)
+  • Scalable architecture with separated frontend and backend
+
+This document provides all information needed to rebuild CleanLoop using AI
+assistants. Start with design/wireframes, then implement frontend components,
+then backend APIs, then integration and testing.
+
+Good luck with your rebuild! 🌍♻️
+
+===============================================================================
+END OF REBUILD GUIDE
+===============================================================================
