@@ -3,7 +3,8 @@ import { Footer } from './Footer';
 import { Leaf, Recycle, MapPin, Wallet, ArrowRight, Zap, Truck, Shield } from 'lucide-react';
 import { loadDemoMode, User } from '../types';
 
-const TRUCK_BG = '/truck-bg.jpg';
+const TRUCK_BG =
+  'https://images.unsplash.com/photo-1618434772352-4e2ac5d9d0a4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3YXN0ZSUyMGdhcmJhZ2UlMjB0cnVjayUyMExhZ29zJTIwY2l0eSUyMHN0cmVldHxlbnwxfHx8fDE3Nzc5NzQ0ODV8MA&ixlib=rb-4.1.0&q=80&w=1080';
 
 interface WelcomePageProps {
   onNavigate: (page: string) => void;
