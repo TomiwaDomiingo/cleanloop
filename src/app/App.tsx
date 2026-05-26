@@ -9,6 +9,7 @@ import { TrackPickup } from './components/TrackPickup';
 import { ReportDumpsite } from './components/ReportDumpsite';
 import { Wallet } from './components/Wallet';
 import { Profile } from './components/Profile';
+import { History } from './components/History';
 import { DriverPortal } from './components/DriverPortal';
 import { AdminPortal } from './components/AdminPortal';
 import {
@@ -125,12 +126,18 @@ export default function App() {
     // ── Authenticated user routes ──────────────────────────────
     switch (currentPage) {
       case 'dashboard':
-      case 'history':
         return (
           <Dashboard
             user={currentUser}
             onNavigate={handleNavigate}
             onLogout={handleLogout}
+          />
+        );
+      case 'history':
+        return (
+          <History
+            user={currentUser}
+            onNavigate={handleNavigate}
           />
         );
       case 'request-pickup':

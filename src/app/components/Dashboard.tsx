@@ -38,6 +38,14 @@ export function Dashboard({ user, onNavigate, onLogout }: DashboardProps) {
       page: 'report-dumpsite',
     },
     {
+      icon: History,
+      title: 'My History',
+      desc: 'View all activities',
+      color: 'bg-[#E0E7FF] text-[#6366F1]',
+      borderColor: 'border-[#6366F1]',
+      page: 'history',
+    },
+    {
       icon: Wallet,
       title: 'My Wallet',
       desc: `${user.points.toLocaleString()} CleanPoints`,
@@ -184,7 +192,7 @@ export function Dashboard({ user, onNavigate, onLogout }: DashboardProps) {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-black text-gray-900">Recent Activity</h2>
             <button
-              onClick={() => onNavigate('wallet')}
+              onClick={() => onNavigate('history')}
               className="text-[#16A34A] text-sm font-bold hover:underline"
             >
               View All
