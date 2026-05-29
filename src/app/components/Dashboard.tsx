@@ -263,7 +263,7 @@ export function Dashboard({ user, onNavigate, onLogout }: DashboardProps) {
         <div className="grid grid-cols-4 gap-1 p-2">
           {[
             { icon: Recycle, label: 'Home', page: 'dashboard' },
-            { icon: History, label: 'History', page: 'wallet' },
+            { icon: History, label: 'History', page: 'history' },
             { icon: Wallet, label: 'Wallet', page: 'wallet' },
             { icon: User, label: 'Profile', page: 'profile' },
           ].map((item, idx) => (
